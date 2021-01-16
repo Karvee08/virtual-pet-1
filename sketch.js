@@ -1,84 +1,92 @@
-var dog
-var happyDog
-var dogHappy
-var database
-var foods
-var foodStock
+var dog, happyDog, database, foodS, foodStock
+var dogImg, dogHappyImg;
+var milk, milkImg;
+
+
 function preload()
 {
-  //load images here
-  happyDog=loadImage("images/dogImg.png")
-  dogHappy=loadImage("images/dogImg1.png")
+  dogImg = loadImage("Dog.png");
+  dogHappyImg = loadImage("happydog.png");
+  milkImg = loadImage("milk.png");
+
 }
 
 function setup() {
+  database = firebase.database();
   createCanvas(500, 500);
   
-  dog=createSprite(250,250,10,10)
-  dog.addImage(happyDog)
-  dog.scale=0.2
+  dog = createSprite(250,250,10,10);
+  dog.addImage(dogImg);
+  dog.scale = 0.15;
 
+  foodStock = database.ref('food');
+  foodStock.on("value",readStock);
+  foodStock.set(50);
   
+  milk = createSprite(140,435,10,10);
+  milk.addImage(milkImg);
+  milk.scale = 0.09;
 
-  database=firebase.database()
-
-  foodStock=database.ref('Food')
-foodStock.on("value",readStock)
-
+  milk1 = createSprite(210,280,50,50);
+  milk1.addImage(milkImg);
+  milk1.scale = 0.09;
+  milk1.visible = false;
   
 }
-
 
 function draw() {  
-  background(46,138,87)
+  background(46, 139, 87)
 
-  if(keyWentDown(UP_ARROW))
-{
+  if(foodS !== 0){
+  if(keyWentDown(UP_ARROW)){
+    writeStock(foodS);
+    foodS=foodS-1
+    dog.addImage(dogHappyImg);
+    milk1.visible = true;
+   
+  }
 
-  writeStock(foods)
-  dog.addImage(dogHappy)
-
-
-
+  if(keyWentUp(UP_ARROW)){
+    writeStock(foodS);
+    dog.addImage(dogImg);
+    milk1.visible = false;
+  }
 }
-
-
+if(foodS == 0){
+  dog.addImage(dogImg)
+  fill("black")
+  textSize(15)
+  text("Buy more food",100,350);
+  text("Press Space to buy food",100,400);
+}
+if(keyWentDown(32)){
+  foodS=50;
+}
   drawSprites();
-  //add styles here
-  textSize(20)
-  fill("yellow")
-  stroke("yellow")
-  text("Food Remaining:"+foods,200,100)
-
+  textSize(17);
+  fill("black");
+  text("I am your Puppy Drago.. I am Hungry ",100,150);
+  fill("black");
+  text(" Press up arrow key to feed your pet Dog Bruno",50,50);
+  fill("black");
+  text("Milk Bottles Remaining  "+foodS,170,440);
 }
 
 function readStock(data)
 {
-
-foods=data.val()
+  foodS = data.val();
 }
 
+function writeStock(x){
 
+  if(x<=0){
+    x = 0;
+  }else{
+    x=x-1
+  }
 
-function writeStock(x)
-{
-
-  if(x<=0)
-  {
-x=0
+  database.ref('/').update({
+    food:x
+  })
 }
-else
-{
-x=x-1
-
-}
-
-database.ref('/').update({Food:x})
-
-
-
-
-
-}
-
 
